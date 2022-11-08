@@ -20,7 +20,13 @@ def train(epoch):
     t = time.time()
     model.train()
     optimizer.zero_grad()
-    output = model(features, adj)
+    """
+        features: (2708, 1433)
+        adj: (2708, 2708)
+    """
+    output = model(features, adj)       # torch.Size([2708, 7])
+    # print(output[idx_train])            # torch.Size([140, 7])
+    # print(labels[idx_train])            # torch.Size([140])
     loss_train = F.nll_loss(output[idx_train], labels[idx_train])
     acc_train = accuracy(output[idx_train], labels[idx_train])
     loss_train.backward()
@@ -86,7 +92,7 @@ if __name__ == '__main__':
 
     # 训练模型
     t_total = time.time()
-    epochs = 100
+    epochs = 1
     for epoch in range(epochs):
         train(epoch)
 
@@ -94,4 +100,4 @@ if __name__ == '__main__':
     print("Total time elapsed: {:.4f}s".format(time.time() - t_total))
 
     # 测试模型
-    compute_test(model=model)
+    # compute_test(model=model)

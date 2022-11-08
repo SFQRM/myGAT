@@ -44,7 +44,7 @@ def load_data(path="./data/cora/", dataset="cora"):
     """获取邻接矩阵"""
     adj = sp.coo_matrix((np.ones(edges.shape[0]), (edges[:, 0], edges[:, 1])), shape=(labels.shape[0], labels.shape[0]), dtype=np.float32)
     adj = adj + adj.T.multiply(adj.T > adj) - adj.multiply(adj.T > adj)
-    # print(adj)
+    # print(adj.shape)          # (2708, 2708)
     # 规范化邻接矩阵
     adj = normalize_adj(adj + sp.eye(adj.shape[0]))
     # print(adj)

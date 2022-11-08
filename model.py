@@ -9,7 +9,7 @@ class GAT(nn.Module):
         """
             Dense version of GAT.
             num_features: 特征维度
-            num_hidden:
+            num_hidden: 隐藏层输出特征维度
             num_class: 标签数量
             num_heads: 注意力头数量
             dropout: 置零比率
@@ -26,7 +26,9 @@ class GAT(nn.Module):
 
     def forward(self, x, adj):
         x = F.dropout(x, self.dropout, training=self.training)
+        # print(x.shape)    # torch.Size([2708, 1433])
         x = torch.cat([att(x, adj) for att in self.attentions], dim=1)
+        # print(x.shape)
         x = F.dropout(x, self.dropout, training=self.training)
         x = F.elu(self.out_att(x, adj))
         return F.log_softmax(x, dim=1)

@@ -31,6 +31,10 @@ def normalize_adj(mx):
 
 
 def accuracy(output, labels):
+    """
+        # A.max(1)：返回A每一行最大值组成的一维数组；
+        # [1]则表示返回最大值的索引
+    """
     preds = output.max(1)[1].type_as(labels)
     correct = preds.eq(labels).double()
     correct = correct.sum()

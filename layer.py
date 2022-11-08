@@ -35,7 +35,9 @@ class GraphAttentionLayer(nn.Module):
         """
             torch.mm是两个矩阵相乘，即两个二维的张量相乘
         """
-        Wh = torch.mm(h, self.W) # h.shape: (N, in_features), Wh.shape: (N, out_features)
+        # Wh = h X W
+        Wh = torch.mm(h, self.W)                          # h.shape: (N, in_features)
+        # print("Wh的维度：", Wh.shape)                     # Wh.shape: (N, out_features)
         e = self._prepare_attentional_mechanism_input(Wh)
 
         zero_vec = -9e15*torch.ones_like(e)
@@ -62,6 +64,7 @@ class GraphAttentionLayer(nn.Module):
         Wh2 = torch.matmul(Wh, self.a[self.out_features:, :])
         # broadcast add
         e = Wh1 + Wh2.T
+        # print(e.shape)
         return self.leakyrelu(e)
 
     def __repr__(self):
