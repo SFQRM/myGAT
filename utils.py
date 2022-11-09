@@ -1,5 +1,7 @@
 import numpy as np
 import scipy.sparse as sp
+import networkx as nx
+import torch as th
 
 
 def encode_onehot(labels):
@@ -39,3 +41,14 @@ def accuracy(output, labels):
     correct = preds.eq(labels).double()
     correct = correct.sum()
     return correct / len(labels)
+
+
+def clustering_coefficient(adjacency):
+    adj = adjacency.numpy()
+    num_node = adj.shape[0]
+    G = nx.from_numpy_matrix(adj, create_using=None)
+    G_cluster = nx.clustering(G)
+    G_cluster_value = np.array(list(G_cluster.values()))
+    G_cluster_value = np.expand_dims(G_cluster_value, 0).repeat(num_node, axis=0)
+    G_cluster_value = th.tensor(G_cluster_value, dtype=th.float)
+    return G_cluster_value

@@ -46,7 +46,7 @@ def load_data(path="./data/cora/", dataset="cora"):
     adj = adj + adj.T.multiply(adj.T > adj) - adj.multiply(adj.T > adj)
     # print(adj.shape)          # (2708, 2708)
     # 规范化邻接矩阵
-    adj = normalize_adj(adj + sp.eye(adj.shape[0]))
+    # adj = normalize_adj(adj + sp.eye(adj.shape[0]))
     # print(adj)
     adj = torch.FloatTensor(np.array(adj.todense()))
 

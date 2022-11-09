@@ -24,11 +24,12 @@ class GAT(nn.Module):
 
         self.out_att = GraphAttentionLayer(num_hidden * num_heads, num_class, dropout=dropout, alpha=alpha, concat=False)
 
-    def forward(self, x, adj):
+    def forward(self, x, adj, cc):
         x = F.dropout(x, self.dropout, training=self.training)
         # print(x.shape)    # torch.Size([2708, 1433])
-        x = torch.cat([att(x, adj) for att in self.attentions], dim=1)
+        x = torch.cat([att(x, adj, cc) for att in self.attentions], dim=1)
         # print(x.shape)
         x = F.dropout(x, self.dropout, training=self.training)
-        x = F.elu(self.out_att(x, adj))
+        x = F.dropout(x, self.dropout, training=self.training)
+        x = F.elu(self.out_att(x, adj, cc))
         return F.log_softmax(x, dim=1)

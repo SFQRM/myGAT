@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+# from utils import clustering_coefficient
 
 
 class GraphAttentionLayer(nn.Module):
@@ -31,19 +32,34 @@ class GraphAttentionLayer(nn.Module):
 
         self.leakyrelu = nn.LeakyReLU(self.alpha)
 
-    def forward(self, h, adj):
+    def forward(self, h, adj, cc):
         """
             torch.mm是两个矩阵相乘，即两个二维的张量相乘
         """
+        # print("h.shape:",h.shape)
+        # print("self.W.shape:",self.W.shape)
         # Wh = h X W
         Wh = torch.mm(h, self.W)                          # h.shape: (N, in_features)
+        # print(Wh)
         # print("Wh的维度：", Wh.shape)                     # Wh.shape: (N, out_features)
         e = self._prepare_attentional_mechanism_input(Wh)
+        # print("e.shape:", e.shape)
+
+        # cc = clustering_coefficient(adj)
+        # print(cc.shape)
+
+        e = e + cc
+
+        # print(e)
 
         zero_vec = -9e15*torch.ones_like(e)
         attention = torch.where(adj > 0, e, zero_vec)
+        # print("attention.shape:",attention.shape)
         attention = F.softmax(attention, dim=1)
+        # print("attention_.shape:", attention.shape)
         attention = F.dropout(attention, self.dropout, training=self.training)
+        # print(attention.shape)
+        # print(Wh.shape)
         h_prime = torch.matmul(attention, Wh)
 
         if self.concat:
@@ -63,8 +79,10 @@ class GraphAttentionLayer(nn.Module):
         Wh1 = torch.matmul(Wh, self.a[:self.out_features, :])
         Wh2 = torch.matmul(Wh, self.a[self.out_features:, :])
         # broadcast add
-        e = Wh1 + Wh2.T
+        e = Wh1 + Wh2.T             # torch.Size([2708, 2708])
         # print(e.shape)
+        # print(cc.shape)
+        # e = e + cc
         return self.leakyrelu(e)
 
     def __repr__(self):

@@ -13,7 +13,7 @@ from torch.autograd import Variable
 import time
 
 # 引用一些工具类函数
-from utils import accuracy
+from utils import accuracy, clustering_coefficient
 
 
 def train(epoch):
@@ -24,7 +24,7 @@ def train(epoch):
         features: (2708, 1433)
         adj: (2708, 2708)
     """
-    output = model(features, adj)       # torch.Size([2708, 7])
+    output = model(features, adj, cc)       # torch.Size([2708, 7])
     # print(output[idx_train])            # torch.Size([140, 7])
     # print(labels[idx_train])            # torch.Size([140])
     loss_train = F.nll_loss(output[idx_train], labels[idx_train])
@@ -52,9 +52,9 @@ def train(epoch):
     # return loss_val.data.item()
 
 
-def compute_test(model):
+def compute_test(model, cc):
     model.eval()
-    output = model(features, adj)
+    output = model(features, adj, cc)
     loss_test = F.nll_loss(output[idx_test], labels[idx_test])
     acc_test = accuracy(output[idx_test], labels[idx_test])
     print("Test set results:",
@@ -66,6 +66,9 @@ if __name__ == '__main__':
     # 加载数据
     path = "./data/cora/"
     labels, features, adj, idx_train, idx_val, idx_test = load_data(path=path)
+
+    cc = clustering_coefficient(adj)
+    # print(cc)
 
     # 构建模型
     model = GAT(num_features=features.shape[1],
@@ -84,20 +87,24 @@ if __name__ == '__main__':
     features = features.cuda()
     adj = adj.cuda()
     labels = labels.cuda()
+    cc = cc.cuda()
     idx_train = idx_train.cuda()
     idx_val = idx_val.cuda()
     idx_test = idx_test.cuda()
 
-    features, adj, labels = Variable(features), Variable(adj), Variable(labels)
+    features, adj, labels, cc = Variable(features), Variable(adj), Variable(labels), Variable(cc)
 
     # 训练模型
     t_total = time.time()
-    epochs = 1
+    epochs = 1000
     for epoch in range(epochs):
         train(epoch)
+
+    # for name, param in model.named_parameters():
+    #     print(name, '-->', param.type(), '-->', param.dtype, '-->', param.shape)
 
     print("Optimization Finished!")
     print("Total time elapsed: {:.4f}s".format(time.time() - t_total))
 
     # 测试模型
-    # compute_test(model=model)
+    compute_test(model=model, cc=cc)
